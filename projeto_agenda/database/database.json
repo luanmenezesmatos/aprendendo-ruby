@@ -3,6 +3,6 @@
   "agenda": [
     { "nome": "João", "telefone": "123456789" },
     { "nome": "Maria", "telefone": "987654321" },
-    { "nome": "Luan Menezes", "telefone": "12345678910" }
+    { "nome": "Luan", "telefone": "12345" }
   ]
 }

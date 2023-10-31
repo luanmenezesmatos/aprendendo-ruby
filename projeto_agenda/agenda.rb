@@ -2,9 +2,10 @@
 # Contato terão as seguintes informações: Nome e telefone;
 # Poderemos ver todos os contatos registrados ou somente um contato (fitlro por nome);
 
-require('json')
+require("json")
 
-require_relative './structures/select_option'
+require_relative "./structures/select_option"
+require_relative "./structures/select_contacts"
 
 # Chamando a classe "select_option" e passando os parâmetros
 # Instanciando a classe "select_option"
@@ -12,7 +13,7 @@ question = "Seja bem-vindo(a) a agenda de contatos, o que deseja fazer?\n\n"
 options = ["Adicionar contato", "Editar contato", "Remover contato", "Ver todos os contatos", "Ver um contato", "Sair"]
 option_selector = SelectOption.new(question, options)
 
-agenda_database_file = File.open('./database/database.json', 'r')
+agenda_database_file = File.open("./database/database.json", "r")
 agenda_database = agenda_database_file.read
 
 @agenda = JSON.parse(agenda_database)
@@ -21,21 +22,21 @@ def add_contact
     puts "Digite o nome do contato:"
     nome = gets.chomp
 
-    # Verificar se já existe um contato com o nome informado
+        # Verificar se já existe um contato com o nome informado
     if @agenda["agenda"].any? { |contact| contact["nome"] == nome }
         puts "Já existe um contato com esse nome!"
         return add_contact # Retornar para a digitação do nome do contato
     else
         puts "Digite o telefone do contato:"
         telefone = gets.chomp
-        end
+    end
 
     # Verificar se já existe um contato com o telefone informado
     if @agenda["agenda"].any? { |contact| contact["telefone"] == telefone }
         puts "Já existe um contato com esse telefone!"
         return add_contact # Retornar para a digitação do nome do contato
     end
-    
+
     # Verificar se já existe um contato com o nome e telefone informados
     if @agenda["agenda"].any? { |contact| contact["nome"] == nome && contact["telefone"] == telefone }
         puts "Já existe um contato com esse nome e telefone!"
@@ -57,7 +58,7 @@ def add_contact
     else
         @agenda["agenda"] << { nome: nome, telefone: telefone }
 
-        agenda_database_file = File.open('./database/database.json', 'w')
+        agenda_database_file = File.open("./database/database.json", "w")
         agenda_database_file.write(@agenda.to_json)
         agenda_database_file.close
 
@@ -66,20 +67,39 @@ def add_contact
 end
 
 def edit_contact
-    puts "Digite o nome do contato que deseja editar:"
-    nome = gets.chomp
+    contact_question = "Selecione um contato para editar (ou digite '0' para cancelar):\n\n"
+    contact_selector = SelectContacts.new(contact_question, @agenda["agenda"])
+    contact_index = contact_selector.choose
 
-    # Verificar se já existe um contato com o nome informado
-    if @agenda["agenda"].any? { |contact| contact["nome"] == nome }
-        puts "Já existe um contato com esse nome!"
-        return add_contact # Retornar para a digitação do nome do contato
+    input = gets.chomp.to_i
+    puts input
+
+    case input
+    when 0
+        puts "Operação cancelada!"
     else
-        puts "Digite o telefone do contato:"
-        telefone = gets.chomp
-        end
+        puts "Digite o novo nome do contato:"
+        nome = gets.chomp
 
-    # Verificar se já existe um contato com o telefone informado
-    if @agenda["agenda"].any? { |contact| contact["telefone"] == telefone }
+        puts "Digite o novo telefone do contato:"
+        telefone = gets.chomp
+
+        # Verificar se o novo contato já existe
+        if @agenda["agenda"].any? { |contact| contact["nome"] == nome && contact["telefone"] == telefone }
+            puts "Já existe um contato com esse nome e telefone!"
+        else
+            @agenda["agenda"][contact_index - 1]["nome"] = nome
+            @agenda["agenda"][contact_index - 1]["telefone"] = telefone
+
+            agenda_database_file = File.open("./database/database.json", "w")
+            agenda_database_file.write(@agenda.to_json)
+            agenda_database_file.close
+
+            puts "Contato editado com sucesso!"
+        end
+    end
+end
+
 def all_contacts
     @agenda.each do |contact|
         puts "Nome: #{contact[:nome]}"
@@ -90,22 +110,22 @@ def all_contacts
 end
 
 loop do
-  choice = option_selector.choose
-  puts "Você escolheu: #{options[choice - 1]}"
+    choice = option_selector.choose
+    puts "Você escolheu: #{options[choice - 1]}"
 
-  case choice
-  when 1
+    case choice
+    when 1
         add_contact
-  when 2
-      puts "Editar contato"
-  when 3
-      puts "Remover contato"
-  when 4
+    when 2
+        edit_contact
+    when 3
+        puts "Remover contato"
+    when 4
         all_contacts
-  when 5
-      puts "Ver um contato"
-  when 6
-      puts "Até logo!"
-      break
-  end
+    when 5
+        puts "Ver um contato"
+    when 6
+        puts "Até logo!"
+        break
+    end
 end
