@@ -72,7 +72,6 @@ def edit_contact
     contact_index = contact_selector.choose
 
     input = gets.chomp.to_i
-    puts input
 
     case input
     when 0
@@ -100,12 +99,48 @@ def edit_contact
     end
 end
 
+def remove_contact
+    contact_question = "Selecione um contato para editar (ou digite '0' para cancelar):\n\n"
+    contact_selector = SelectContacts.new(contact_question, @agenda["agenda"])
+    contact_index = contact_selector.choose
+
+    input = gets.chomp.to_i
+
+    if input
+        @agenda["agenda"].delete_at(contact_index - 1)
+
+        agenda_database_file = File.open("./database/database.json", "w")
+        agenda_database_file.write(@agenda.to_json)
+        agenda_database_file.close
+
+        puts "Contato removido com sucesso!"
+    else
+        puts "Operação cancelada!"
+    end
+end
+
 def all_contacts
-    @agenda.each do |contact|
-        puts "Nome: #{contact[:nome]}"
-        puts "Telefone: #{contact[:telefone]}"
+    @agenda["agenda"].each do |contact|
+        puts "\nNome: #{contact["nome"]}"
+        puts "Telefone: #{contact["telefone"]}"
         puts "-" * 20
         puts
+    end
+end
+
+def view_contact
+    puts "Digite o nome do contato:"
+    nome = gets.chomp
+
+    contact = @agenda["agenda"].find { |contact| contact["nome"] == nome }
+
+    if contact
+        puts "Nome: #{contact["nome"]}"
+        puts "Telefone: #{contact["telefone"]}"
+        puts "-" * 20
+        puts
+    else
+        puts "Contato não encontrado!"
     end
 end
 
@@ -119,11 +154,11 @@ loop do
     when 2
         edit_contact
     when 3
-        puts "Remover contato"
+        remove_contact
     when 4
         all_contacts
     when 5
-        puts "Ver um contato"
+        view_contact
     when 6
         puts "Até logo!"
         break

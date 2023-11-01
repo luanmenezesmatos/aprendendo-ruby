@@ -14,9 +14,7 @@ class SelectContacts
         begin
             call
             input = gets.chomp.to_i
-            if input == 0
-                exit
-            elsif input < 1 || input > @contacts.length
+            if input <= 0 || input > @contacts.length
                 raise "Opção inválida! Tente novamente."
             end
             input
